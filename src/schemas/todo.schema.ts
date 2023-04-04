@@ -3,6 +3,7 @@ import { z } from "zod";
 export interface TodoItem {
   id: number;
   title: string;
+  owner: string;
 }
 
 export const TodoCreateSchema = z.object({

@@ -9,5 +9,6 @@ declare global {
   interface Req<ReqBody = any, ReqQuery extends Query = any> extends Request {
     body: ReqBody;
     query: ReqQuery;
+    userId: number;
   }
 }

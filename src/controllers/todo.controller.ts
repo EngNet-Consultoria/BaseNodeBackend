@@ -11,10 +11,21 @@ export async function list(req: Req, res: Res<TodoItem[]>) {
     select: {
       id: true,
       title: true,
+      owner: {
+        select: {
+          name: true,
+        },
+      },
     },
   });
 
-  return res.status(200).json(todos);
+  const mappedTodos = todos.map((todo) => ({
+    id: todo.id,
+    title: todo.title,
+    owner: todo.owner.name,
+  }));
+
+  return res.status(200).json(mappedTodos);
 }
 
 export async function retrieve(req: Req, res: Res<TodoItem>) {
@@ -27,6 +38,11 @@ export async function retrieve(req: Req, res: Res<TodoItem>) {
     select: {
       id: true,
       title: true,
+      owner: {
+        select: {
+          name: true,
+        },
+      },
     },
   });
 
@@ -34,7 +50,11 @@ export async function retrieve(req: Req, res: Res<TodoItem>) {
     throw new createHttpError.NotFound("Todo not found");
   }
 
-  return res.status(200).json(todo);
+  return res.status(200).json({
+    id: todo.id,
+    title: todo.title,
+    owner: todo.owner.name,
+  });
 }
 
 export async function create(req: Req, res: Res<TodoItem>) {
@@ -43,12 +63,26 @@ export async function create(req: Req, res: Res<TodoItem>) {
   const todo = await prisma.todo.create({
     data: {
       title: validatedData.title,
+      owner: {
+        connect: {
+          id: req.userId,
+        },
+      },
     },
     select: {
       id: true,
       title: true,
+      owner: {
+        select: {
+          name: true,
+        },
+      },
     },
   });
 
-  return res.status(201).json(todo);
+  return res.status(201).json({
+    id: todo.id,
+    title: todo.title,
+    owner: todo.owner.name,
+  });
 }

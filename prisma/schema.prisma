@@ -10,7 +10,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id                 Int         @id @default(autoincrement())
+  email              String      @unique @db.VarChar(100)
+  password           String      @db.VarChar(100)
+  name               String      @db.VarChar(50)
+  todos              Todo[]
+  passwordResetToken ResetToken?
+}
+
+model ResetToken {
+  token     String   @id @default(uuid()) @db.Uuid
+  userId    Int      @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+}
+
 model Todo {
-  id    Int    @id @default(autoincrement())
-  title String @db.VarChar(50)
+  id      Int    @id @default(autoincrement())
+  title   String @db.VarChar(50)
+  ownerId Int
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 }
