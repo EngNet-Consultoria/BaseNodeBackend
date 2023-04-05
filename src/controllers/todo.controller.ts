@@ -59,13 +59,18 @@ export async function retrieve(req: Req, res: Res<TodoItem>) {
 
 export async function create(req: Req, res: Res<TodoItem>) {
   const validatedData = TodoCreateSchema.parse(req.body);
+  const userId = res.locals.userId;
+
+  if (userId === undefined) {
+    throw new createHttpError.Unauthorized("You must be logged in to create a todo");
+  }
 
   const todo = await prisma.todo.create({
     data: {
       title: validatedData.title,
       owner: {
         connect: {
-          id: req.userId,
+          id: userId,
         },
       },
     },

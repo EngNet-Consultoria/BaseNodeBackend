@@ -70,5 +70,11 @@ export async function verifyPasswordResetToken(token: string) {
     throw new createHttpError.Unauthorized("Token expired");
   }
 
+  await prisma.resetToken.delete({
+    where: {
+      userId: tokenInfo.userId,
+    },
+  });
+
   return tokenInfo;
 }

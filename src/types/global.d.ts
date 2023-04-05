@@ -6,9 +6,8 @@ declare global {
     json: Send<ResBody, this>;
   }
 
-  interface Req<ReqBody = any, ReqQuery extends Query = any> extends Request {
+  interface Req<ReqBody = unknown, ReqQuery extends Query = any> extends Request {
     body: ReqBody;
     query: ReqQuery;
-    userId: number;
   }
 }

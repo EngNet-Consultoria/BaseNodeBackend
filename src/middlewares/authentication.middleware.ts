@@ -14,7 +14,7 @@ export function isAuthenticated(req: Req, res: Res<never>, next: NextFunction) {
   try {
     const payload = decodeAccessToken(accessToken);
 
-    req.userId = payload.userId;
+    res.locals.userId = payload.userId;
 
     next();
   } catch (err) {
