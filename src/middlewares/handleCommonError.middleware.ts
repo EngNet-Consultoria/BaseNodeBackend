@@ -1,8 +1,13 @@
-import { type NextFunction } from "express";
-import { HttpError } from "http-errors";
+import { type NextFunction, type Request, type Response } from "express";
 import { type ErrorResponse } from "../schemas/error.schema";
+import { HttpError } from "http-errors";
 
-export function handleCommonError(err: Error, req: Req, res: Res<ErrorResponse>, next: NextFunction) {
+export function handleCommonError(
+  err: Error,
+  req: Request,
+  res: Response<ErrorResponse>,
+  next: NextFunction,
+) {
   if (err instanceof HttpError) {
     return res.status(err.status).json({
       message: err.message,

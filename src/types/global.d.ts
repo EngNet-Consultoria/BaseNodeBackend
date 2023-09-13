@@ -1,13 +1,16 @@
-import { type Send, type Query } from "express-serve-static-core";
-import { type Request, type Response } from "express";
-
-declare global {
-  interface Res<ResBody> extends Response {
-    json: Send<ResBody, this>;
+declare namespace NodeJS {
+  interface ProcessEnv {
+    NODE_ENV: string;
+    PORT: string;
+    JWT_SECRET: string;
+    JWT_EXPIRES_IN: string;
+    JWT_REFRESH_SECRET: string;
+    JWT_REFRESH_EXPIRES_IN: string;
   }
+}
 
-  interface Req<ReqBody = any, ReqQuery extends Query = any> extends Request {
-    body: ReqBody;
-    query: ReqQuery;
+declare namespace Express {
+  interface Request {
+    userId?: number;
   }
 }

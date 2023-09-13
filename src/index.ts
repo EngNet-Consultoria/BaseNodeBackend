@@ -11,6 +11,8 @@ import { handlePrismaError } from "./middlewares/handlePrismaError.middleware";
 import { handleCommonError } from "./middlewares/handleCommonError.middleware";
 
 import todoRoute from "./routes/todo.route";
+import authRoute from "./routes/auth.route";
+import { requireLogin } from "./middlewares/auth.middleware";
 
 dotenv.config();
 
@@ -20,7 +22,8 @@ app.use(express.json());
 app.use(cors());
 app.use(helmet());
 
-app.use("/todo", todoRoute);
+app.use("/auth", authRoute);
+app.use("/todo", requireLogin, todoRoute);
 
 app.use(handleZodError);
 app.use(handlePrismaError);
