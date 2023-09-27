@@ -8,3 +8,5 @@ export interface TodoItem {
 export const TodoCreateSchema = z.object({
   title: z.string().max(50),
 });
+
+export const TodoIdSchema = z.coerce.number().int().positive();

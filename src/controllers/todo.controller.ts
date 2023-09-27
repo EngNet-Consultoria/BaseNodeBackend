@@ -1,4 +1,4 @@
-import { type TodoItem, TodoCreateSchema } from "../schemas/todo.schema";
+import { type TodoItem, TodoCreateSchema, TodoIdSchema } from "../schemas/todo.schema";
 import { prisma } from "../prisma";
 import createHttpError from "http-errors";
 import { z } from "zod";
@@ -28,7 +28,7 @@ export async function list(req: Request, res: Response<TodoItem[]>) {
 }
 
 export async function retrieve(req: Request, res: Response<TodoItem>) {
-  const id = z.coerce.number().int().positive().parse(req.params.id);
+  const id = TodoIdSchema.parse(req.params.id);
   const { userId } = req;
 
   if (userId === undefined) {
@@ -80,7 +80,7 @@ export async function create(req: Request, res: Response<TodoItem>) {
 }
 
 export async function update(req: Request, res: Response<TodoItem>) {
-  const id = z.coerce.number().int().positive().parse(req.params.id);
+  const id = TodoIdSchema.parse(req.params.id);
   const { title } = TodoCreateSchema.parse(req.body);
   const { userId } = req;
 
