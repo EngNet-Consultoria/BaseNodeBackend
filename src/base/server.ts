@@ -5,7 +5,7 @@ import morgan from "morgan";
 
 import { handleZodError } from "./middlewares/handleZodError.middleware";
 import { handleCommonError } from "./middlewares/handleCommonError.middleware";
-import todoRoute from "./routes/todo.route";
+import routing from "../routing";
 
 const app = express();
 
@@ -15,8 +15,8 @@ app.use(express.json());
 app.use(cors());
 app.use(helmet());
 
-// ! Include your routes here !
-app.use("/todo", todoRoute);
+// Routes
+routing(app);
 
 // Post-route middlewares
 app.use(handleZodError);
