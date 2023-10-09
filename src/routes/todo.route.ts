@@ -7,17 +7,8 @@ const router = Router();
 
 router.get("/", async (req, res) => {
   // Validate input
-  const { userId } = req;
-
-  if (userId === undefined) {
-    throw new createHttpError.Unauthorized("Usuário não autenticado");
-  }
-
   // Execute business logic
   const todos = await prisma.todo.findMany({
-    where: {
-      userId,
-    },
     orderBy: {
       id: "asc",
     },
@@ -34,17 +25,11 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   // Validate input
   const id = TodoIdSchema.parse(req.params.id);
-  const { userId } = req;
-
-  if (userId === undefined) {
-    throw new createHttpError.Unauthorized("Usuário não autenticado");
-  }
 
   // Execute business logic
-  const todo = await prisma.todo.findFirst({
+  const todo = await prisma.todo.findUnique({
     where: {
       id,
-      userId,
     },
     select: {
       id: true,
@@ -63,21 +48,11 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
   // Validate input
   const { title } = TodoCreateSchema.parse(req.body);
-  const { userId } = req;
-
-  if (userId === undefined) {
-    throw new createHttpError.Unauthorized("Usuário não autenticado");
-  }
 
   // Execute business logic
   const todo = await prisma.todo.create({
     data: {
       title,
-      user: {
-        connect: {
-          id: userId,
-        },
-      },
     },
     select: {
       id: true,
@@ -93,17 +68,11 @@ router.put("/:id", async (req, res) => {
   // Validate input
   const id = TodoIdSchema.parse(req.params.id);
   const { title } = TodoCreateSchema.parse(req.body);
-  const { userId } = req;
-
-  if (userId === undefined) {
-    throw new createHttpError.Unauthorized("Usuário não autenticado");
-  }
 
   // Execute business logic
   const todo = await prisma.todo.update({
     where: {
       id,
-      userId,
     },
     data: {
       title,
@@ -121,17 +90,11 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   // Validate input
   const id = TodoIdSchema.parse(req.params.id);
-  const { userId } = req;
-
-  if (userId === undefined) {
-    throw new createHttpError.Unauthorized("Usuário não autenticado");
-  }
 
   // Execute business logic
   await prisma.todo.delete({
     where: {
       id,
-      userId,
     },
   });
 

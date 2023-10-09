@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv-safe";
 import helmet from "helmet";
 import cors from "cors";
+import morgan from "morgan";
 import "express-async-errors";
 
 import { prisma } from "./prisma";
@@ -11,26 +12,24 @@ import { handlePrismaError } from "./middlewares/handlePrismaError.middleware";
 import { handleCommonError } from "./middlewares/handleCommonError.middleware";
 
 import todoRoute from "./routes/todo.route";
-import authRoute from "./routes/auth.route";
-import { requireLogin } from "./middlewares/auth.middleware";
 
 dotenv.config();
 
 const app = express();
 
+app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(express.json());
 app.use(cors());
 app.use(helmet());
 
 // Include your routes here
-app.use("/auth", authRoute);
-app.use("/todo", requireLogin, todoRoute);
+app.use("/todo", todoRoute);
 
 app.use(handleZodError);
 app.use(handlePrismaError);
 app.use(handleCommonError);
 
-const PORT = process.env.PORT ?? 8080;
+const PORT = process.env.PORT;
 
 app.listen(PORT, async () => {
   await prisma.$connect();
