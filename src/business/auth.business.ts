@@ -1,13 +1,10 @@
-import { type Request, type Response } from "express";
 import createHttpError from "http-errors";
 import bcrypt from "bcrypt";
-import { LoginSchema, type LoginResponse, RefreshSchema, RegisterSchema } from "../schemas/auth.schema";
+import { type LoginResponse, type LoginDTO, type RegisterDTO, type RefreshDTO } from "../schemas/auth.schema";
 import { prisma } from "../prisma";
 import { createAccessToken, createRefreshToken, decodeRefreshToken } from "../services/jwt.service";
 
-export async function login(req: Request, res: Response<LoginResponse>) {
-  const { username, password } = LoginSchema.parse(req.body);
-
+export async function login({ username, password }: LoginDTO): Promise<LoginResponse> {
   const user = await prisma.user.findUnique({
     where: {
       username,
@@ -31,15 +28,14 @@ export async function login(req: Request, res: Response<LoginResponse>) {
   const accessToken = createAccessToken({ userId: user.id });
   const refreshToken = createRefreshToken({ userId: user.id });
 
-  return res.status(200).json({
+  return {
     accessToken,
     refreshToken,
     userId: user.id,
-  });
+  };
 }
 
-export async function register(req: Request, res: Response<LoginResponse>) {
-  const { password, username } = RegisterSchema.parse(req.body);
+export async function register({ username, password }: RegisterDTO): Promise<LoginResponse> {
   const hash = await bcrypt.hash(password, 10);
 
   const user = await prisma.user.create({
@@ -55,23 +51,22 @@ export async function register(req: Request, res: Response<LoginResponse>) {
   const accessToken = createAccessToken({ userId: user.id });
   const refreshToken = createRefreshToken({ userId: user.id });
 
-  return res.status(201).json({
+  return {
     accessToken,
     refreshToken,
     userId: user.id,
-  });
+  };
 }
 
-export async function refresh(req: Request, res: Response<LoginResponse>) {
-  const { refreshToken } = RefreshSchema.parse(req.body);
+export async function refresh({ refreshToken }: RefreshDTO): Promise<LoginResponse> {
   const { userId } = decodeRefreshToken(refreshToken);
 
   const accessToken = createAccessToken({ userId });
   const newRefreshToken = createRefreshToken({ userId });
 
-  return res.status(200).json({
+  return {
     accessToken,
     refreshToken: newRefreshToken,
     userId,
-  });
+  };
 }

@@ -22,6 +22,7 @@ app.use(express.json());
 app.use(cors());
 app.use(helmet());
 
+// Include your routes here
 app.use("/auth", authRoute);
 app.use("/todo", requireLogin, todoRoute);
 
