@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { list, create, retrieve, update, destroy } from "../business/todo.business";
 import createHttpError from "http-errors";
 import { TodoCreateSchema, TodoIdSchema } from "../schemas/todo.schema";
+import { prisma } from "../prisma";
 
 const router = Router();
 
@@ -14,7 +14,18 @@ router.get("/", async (req, res) => {
   }
 
   // Execute business logic
-  const todos = await list(userId);
+  const todos = await prisma.todo.findMany({
+    where: {
+      userId,
+    },
+    orderBy: {
+      id: "asc",
+    },
+    select: {
+      id: true,
+      title: true,
+    },
+  });
 
   // Send response
   return res.status(200).json(todos);
@@ -30,7 +41,20 @@ router.get("/:id", async (req, res) => {
   }
 
   // Execute business logic
-  const todo = await retrieve(id, userId);
+  const todo = await prisma.todo.findFirst({
+    where: {
+      id,
+      userId,
+    },
+    select: {
+      id: true,
+      title: true,
+    },
+  });
+
+  if (todo === null) {
+    throw new createHttpError.NotFound("Todo not found");
+  }
 
   // Send response
   return res.status(200).json(todo);
@@ -38,7 +62,7 @@ router.get("/:id", async (req, res) => {
 
 router.post("/", async (req, res) => {
   // Validate input
-  const input = TodoCreateSchema.parse(req.body);
+  const { title } = TodoCreateSchema.parse(req.body);
   const { userId } = req;
 
   if (userId === undefined) {
@@ -46,7 +70,20 @@ router.post("/", async (req, res) => {
   }
 
   // Execute business logic
-  const todo = await create(input, userId);
+  const todo = await prisma.todo.create({
+    data: {
+      title,
+      user: {
+        connect: {
+          id: userId,
+        },
+      },
+    },
+    select: {
+      id: true,
+      title: true,
+    },
+  });
 
   // Send response
   return res.status(201).json(todo);
@@ -55,7 +92,7 @@ router.post("/", async (req, res) => {
 router.put("/:id", async (req, res) => {
   // Validate input
   const id = TodoIdSchema.parse(req.params.id);
-  const input = TodoCreateSchema.parse(req.body);
+  const { title } = TodoCreateSchema.parse(req.body);
   const { userId } = req;
 
   if (userId === undefined) {
@@ -63,7 +100,19 @@ router.put("/:id", async (req, res) => {
   }
 
   // Execute business logic
-  const todo = await update(id, input, userId);
+  const todo = await prisma.todo.update({
+    where: {
+      id,
+      userId,
+    },
+    data: {
+      title,
+    },
+    select: {
+      id: true,
+      title: true,
+    },
+  });
 
   // Send response
   return res.status(200).json(todo);
@@ -79,7 +128,12 @@ router.delete("/:id", async (req, res) => {
   }
 
   // Execute business logic
-  await destroy(id, userId);
+  await prisma.todo.delete({
+    where: {
+      id,
+      userId,
+    },
+  });
 
   // Send response
   return res.status(204).json();
