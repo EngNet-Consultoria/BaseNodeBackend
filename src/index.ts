@@ -1,37 +1,30 @@
-import express from "express";
+/* eslint-disable import/first */
 import dotenv from "dotenv-safe";
-import helmet from "helmet";
-import cors from "cors";
-import morgan from "morgan";
+dotenv.config();
 import "express-async-errors";
 
-import { prisma } from "./prisma";
+import app from "./server";
+import { mysqlConn } from "./mysql";
+import http from "http";
 
-import { handleZodError } from "./middlewares/handleZodError.middleware";
-import { handlePrismaError } from "./middlewares/handlePrismaError.middleware";
-import { handleCommonError } from "./middlewares/handleCommonError.middleware";
+const server = http.createServer(app);
 
-import todoRoute from "./routes/todo.route";
+server.listen(process.env.PORT, async () => {
+  console.log(`Server started on http://localhost:${process.env.PORT}`);
+});
 
-dotenv.config();
+process.on("SIGINT", async () => {
+  console.log("SIGINT received, shutting down server...");
 
-const app = express();
+  server.close(async () => {
+    await mysqlConn.disconnect();
+  });
+});
 
-app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
-app.use(express.json());
-app.use(cors());
-app.use(helmet());
+process.on("SIGTERM", async () => {
+  console.log("SIGTERM received, shutting down server...");
 
-// Include your routes here
-app.use("/todo", todoRoute);
-
-app.use(handleZodError);
-app.use(handlePrismaError);
-app.use(handleCommonError);
-
-const PORT = process.env.PORT;
-
-app.listen(PORT, async () => {
-  await prisma.$connect();
-  console.log(`Server started on http://localhost:${PORT}`);
+  server.close(async () => {
+    await mysqlConn.disconnect();
+  });
 });
