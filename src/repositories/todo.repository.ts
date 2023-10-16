@@ -1,13 +1,10 @@
 import { mysqlConn } from "../base/mysql";
-import { type TodoItem } from "../schemas/todo.schema";
+import { TodoItemSchema, type TodoItem } from "../schemas/todo.schema";
 
 export async function findAllTodo(): Promise<TodoItem[]> {
   const result = await mysqlConn.query("SELECT id, title FROM todo");
 
-  return result.map((row) => ({
-    id: row.id,
-    title: row.title,
-  }));
+  return TodoItemSchema.array().parse(result);
 }
 
 export async function findTodoById(id: number): Promise<TodoItem | null> {
@@ -15,10 +12,7 @@ export async function findTodoById(id: number): Promise<TodoItem | null> {
 
   if (result.length === 0) return null;
 
-  return {
-    id: result[0]!.id,
-    title: result[0]!.title,
-  };
+  return TodoItemSchema.parse(result[0]);
 }
 
 export async function createTodo(title: string): Promise<TodoItem> {
@@ -26,10 +20,9 @@ export async function createTodo(title: string): Promise<TodoItem> {
 
   const selectResult = await findTodoById(insertResult.insertId);
 
-  return {
-    id: selectResult!.id,
-    title: selectResult!.title,
-  };
+  if (selectResult === null) throw new Error("Failed to create todo");
+
+  return TodoItemSchema.parse(selectResult);
 }
 
 export async function updateTodoById(id: number, title: string): Promise<TodoItem | null> {
@@ -39,10 +32,9 @@ export async function updateTodoById(id: number, title: string): Promise<TodoIte
 
   const selectResult = await findTodoById(id);
 
-  return {
-    id: selectResult!.id,
-    title: selectResult!.title,
-  };
+  if (selectResult === null) return null;
+
+  return TodoItemSchema.parse(selectResult);
 }
 
 export async function deleteTodoById(id: number): Promise<void> {
